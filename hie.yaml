@@ -1,0 +1,12 @@
+cradle:
+  cabal:
+    - path: "./src"
+      component: "lib:Ecosmos"
+    - path: "./tests/doctests.hs"
+      component: "Ecosmos:doctests"
+    - path: "./tests"
+      component: "Ecosmos:test-library"
+    - path: "./bin/Clashi.hs"
+      component: "Ecosmos:exe:clashi"
+    - path: "./bin/Clash.hs"
+      component: "Ecosmos:exe:clash"
