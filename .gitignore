@@ -39,6 +39,4 @@ cabal.config
 *.iml
 
 # HDL directories often created during development cycle
-/vhdl
-/verilog
-/systemverilog
+/VM_Export
