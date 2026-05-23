@@ -1,24 +1,23 @@
 module HexRam (hexRam) where
 
 import Clash.Prelude
-import Clash.Promoted.Nat
 import qualified Example.Hex as Hex
 
-maxDirBits = 4
-
-maxDir = 4 * maxDirBits
-
 hexRam ::
-  (HiddenClockResetEnable dom, KnownNat a) =>
-  Signal dom (Hex.HexCoord (Unsigned a)) -> Signal dom (Unsigned a)
+  forall dom addrWidth.
+  (HiddenClockResetEnable dom, Hex.AddrConstraints addrWidth) =>
+  Signal dom (Hex.HexCoord (Unsigned addrWidth)) -> Signal dom (Unsigned addrWidth)
 hexRam coordS = plantMass
   where
     xS = Hex.x <$> coordS
     yS = Hex.y <$> coordS
-    linAddr = (\y' x' -> y' * fromInteger maxDir + x') <$> yS <*> xS
+
+    -- TODO Think about if mapping the 3d-hexgrid coordinates to a 2d linear address space
+    -- can be made more efficient somehow
+    linAddr = (\y' x' -> y' * (natToNum @addrWidth) + x') <$> yS <*> xS
     plantMass = bRAM linAddr
 
-bRAM :: forall a dom. (HiddenClockResetEnable dom, KnownNat a) => Signal dom (Unsigned a) -> Signal dom (Unsigned a)
+bRAM :: forall dom addrWidth. (HiddenClockResetEnable dom, Hex.AddrConstraints addrWidth) => Signal dom (Unsigned addrWidth) -> Signal dom (Unsigned addrWidth)
 bRAM addr = memOut
   where
-    memOut = blockRam (replicate (powSNat (SNat @2) (SNat @a)) 3) addr (pure Nothing)
+    memOut = blockRam1 NoClearOnReset (SNat :: SNat (addrWidth ^ 2)) 3 addr (pure Nothing)

@@ -1,7 +1,10 @@
 module Example.Hex where
 
 import Clash.Prelude
-import GHC.Generics (Generic)
+
+-- The type-level solver is not the brightest so all type-level computations must be included
+type AddrConstraints a =
+  (KnownNat a, 1 <= a, 1 <= a ^ 2)
 
 data HexCoord a = HexCoord
   { x :: a,
