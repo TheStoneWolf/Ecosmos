@@ -20,8 +20,9 @@ topEntity ::
   Reset Dom50 ->
   Enable Dom50 ->
   Signal Dom50 (Hex.HexCoord (Unsigned 8)) ->
-  Signal Dom50 (Unsigned 8)
-topEntity = exposeClockResetEnable hexRam
+  Signal Dom50 (Maybe (Hex.HexCoord (Unsigned 4))) ->
+  Signal Dom50 (Unsigned 4)
+topEntity clk rst ena inp _ = exposeClockResetEnable hexRam clk rst ena inp (pure Nothing)
 
 plusCoords ::
   (HiddenClockResetEnable dom, KnownNat n) =>

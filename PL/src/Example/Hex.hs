@@ -4,7 +4,7 @@ import Clash.Prelude
 
 -- The type-level solver is not the brightest so all type-level computations must be included
 type AddrConstraints a =
-  (KnownNat a, 1 <= a, 1 <= a ^ 2)
+  (KnownNat a, 1 <= a, 1 <= (2 ^ a) - 1)
 
 data HexCoord a = HexCoord
   { x :: a,

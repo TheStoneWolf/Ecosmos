@@ -12,12 +12,14 @@ import Test.Tasty.Hedgehog
 import Test.Tasty.TH
 import Prelude
 
+genHexCoord :: H.Gen (Hex.HexCoord (C.Unsigned 4))
 genHexCoord =
   Hex.HexCoord
     <$> genUnsigned (Range.linear 0 5)
     <*> genUnsigned (Range.linear 0 5)
     <*> genUnsigned (Range.linear 0 5)
 
+simDuration :: Int
 simDuration = 100
 
 prop_read_ram :: H.Property
@@ -26,7 +28,7 @@ prop_read_ram = H.property $ do
     H.forAll (Gen.list (Range.singleton simDuration) genHexCoord)
 
   -- The output register of the BRAM is undefined on startup, therefore drop it
-  let simOut = drop 1 $ fromIntegral <$> C.sampleN (simDuration + 1) (hexRam @C.System @4 (C.fromList inp)) :: [Int]
+  let simOut = drop 1 $ fromIntegral <$> C.sampleN (simDuration + 1) (hexRam @C.System @4 @4 (C.fromList inp) (pure Nothing)) :: [Int]
       expected = replicate simDuration 3
 
   -- Check that the simulated output matches the expected output
