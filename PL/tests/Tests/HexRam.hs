@@ -12,12 +12,20 @@ import Test.Tasty.Hedgehog
 import Test.Tasty.TH
 import Prelude
 
-genHexCoord :: H.Gen (Hex.HexCoord (C.Unsigned 4))
+type AddrWidth = 4
+
+-- TODO Fix why the highest index element is not allowed in the bram
+vInAddrRange :: H.Gen (C.Unsigned AddrWidth)
+vInAddrRange = genUnsigned (Range.linear 0 ((maxBound :: C.Unsigned AddrWidth) - 1))
+
+type DataD = 4
+
+genHexCoord :: H.Gen (Hex.HexCoord (C.Unsigned AddrWidth))
 genHexCoord =
   Hex.HexCoord
-    <$> genUnsigned (Range.linear 0 5)
-    <*> genUnsigned (Range.linear 0 5)
-    <*> genUnsigned (Range.linear 0 5)
+    <$> vInAddrRange
+    <*> vInAddrRange
+    <*> vInAddrRange
 
 simDuration :: Int
 simDuration = 100
@@ -28,7 +36,7 @@ prop_read_ram = H.property $ do
     H.forAll (Gen.list (Range.singleton simDuration) genHexCoord)
 
   -- The output register of the BRAM is undefined on startup, therefore drop it
-  let simOut = drop 1 $ fromIntegral <$> C.sampleN (simDuration + 1) (hexRam @C.System @4 @4 (C.fromList inp) (pure Nothing)) :: [Int]
+  let simOut = drop 1 $ fromIntegral <$> C.sampleN (simDuration + 1) (hexRam @C.System @AddrWidth @DataD (C.fromList inp) (pure Nothing)) :: [Int]
       expected = replicate simDuration 3
 
   -- Check that the simulated output matches the expected output
