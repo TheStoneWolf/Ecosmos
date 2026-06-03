@@ -32,6 +32,13 @@ packages:
       size: 735
   original:
     hackage: clash-prelude-hedgehog-1.8.5@sha256:7c0fb51609f844a5faf75ecc71fa1aa0b924299c1e3c06a95257124562be56cc,1416
+- completed:
+    hackage: clash-shockwaves-1.0.1@sha256:df90cfb390d1fadbca5a87cbd75ff91d9ae170f220a354762a85454402500ace,5121
+    pantry-tree:
+      sha256: f55d16cd3944a871980ef96ccbd64c4f87f0e3f358eb1099752b23fa2c994a77
+      size: 1489
+  original:
+    hackage: clash-shockwaves-1.0.1
 snapshots:
 - completed:
     sha256: 45b164eaf5c16bd220d2c5d7ab9a66ca0cfbcde7753703a5cb3549172adde813

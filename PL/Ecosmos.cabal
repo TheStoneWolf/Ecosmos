@@ -115,6 +115,7 @@ test-suite doctests
   build-depends:
     base,
     Ecosmos,
+    clash-shockwaves,
     doctest-parallel >= 0.2 && < 0.5,
 
 test-suite test-library
@@ -129,6 +130,8 @@ test-suite test-library
   build-depends:
     Ecosmos,
     QuickCheck,
+    clash-shockwaves,
+    text,
     clash-prelude-hedgehog,
     hedgehog,
     tasty >= 1.2 && < 1.6,
