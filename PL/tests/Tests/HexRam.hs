@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module Tests.HexRam where
 
 import Clash.Hedgehog.Sized.Unsigned
