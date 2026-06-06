@@ -37,7 +37,6 @@ genHexCoord =
   Hex.HexCoord
     <$> vInAddrRange
     <*> vInAddrRange
-    <*> vInAddrRange
 
 simDuration :: Int
 simDuration = 100

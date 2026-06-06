@@ -28,4 +28,4 @@ plusCoords ::
   (HiddenClockResetEnable dom, KnownNat n) =>
   Signal dom (Hex.HexCoord (Unsigned n)) ->
   Signal dom (Hex.HexCoord (Unsigned n))
-plusCoords = fmap (Hex.HexCoord 2 (-2) 0 <>)
+plusCoords = fmap (Hex.HexCoord 2 0 <>)

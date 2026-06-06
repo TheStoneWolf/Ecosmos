@@ -9,15 +9,14 @@ type AddrConstraints a =
 
 data HexCoord a = HexCoord
   { x :: a,
-    y :: a,
-    z :: a
+    y :: a
   }
   deriving (Show, Eq, Generic, NFDataX, BitPack, Waveform)
 
-hexCoord :: (Num a, Eq a) => a -> a -> a -> Maybe (HexCoord a)
-hexCoord x y z
-  | x + y + z == 0 = Just (HexCoord x y z)
+hexCoord :: (Num a, Eq a) => a -> a -> Maybe (HexCoord a)
+hexCoord x y
+  | x + y == 0 = Just (HexCoord x y)
   | otherwise = Nothing
 
 instance (Num a) => Semigroup (HexCoord a) where
-  (HexCoord x0 y0 z0) <> (HexCoord x1 y1 z1) = HexCoord (x0 + x1) (y0 + y1) (z0 + z1)
+  (HexCoord x0 y0) <> (HexCoord x1 y1) = HexCoord (x0 + x1) (y0 + y1)
