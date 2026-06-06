@@ -73,6 +73,7 @@ common common-options
   build-depends:
     base,
     Cabal,
+    clash-shockwaves,
 
     -- clash-prelude will set suitable version bounds for the plugins
     clash-prelude >= 1.8.5 && < 1.10,

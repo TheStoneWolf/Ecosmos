@@ -1,6 +1,7 @@
 module Example.Hex where
 
 import Clash.Prelude
+import Clash.Shockwaves
 
 -- The type-level solver is not the brightest so all type-level computations must be included
 type AddrConstraints a =
@@ -11,7 +12,7 @@ data HexCoord a = HexCoord
     y :: a,
     z :: a
   }
-  deriving (Show, Eq, Generic, NFDataX)
+  deriving (Show, Eq, Generic, NFDataX, BitPack, Waveform)
 
 hexCoord :: (Num a, Eq a) => a -> a -> a -> Maybe (HexCoord a)
 hexCoord x y z
