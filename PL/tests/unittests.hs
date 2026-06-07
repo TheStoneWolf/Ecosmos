@@ -1,5 +1,6 @@
 import Test.Tasty
-import qualified Tests.HexRam as Tests
+import qualified Tests.HexRam as HexRamTests
+import qualified Tests.Vegetation as VegetationTests
 import Prelude
 
 main :: IO ()
@@ -7,5 +8,6 @@ main =
   defaultMain $
     testGroup
       "."
-      [ Tests.accumTests
+      [ HexRamTests.accumTests,
+        VegetationTests.vegetationTests
       ]

@@ -89,6 +89,8 @@ library
     Example.Hex
     Example.Project
     HexRam
+    Vegetation
+    VegetationCalc
   default-language: Haskell2010
 
 -- Builds the executable 'clash', with Ecosmos project in scope
@@ -128,6 +130,7 @@ test-suite test-library
   main-is: unittests.hs
   other-modules:
     Tests.HexRam
+    Tests.Vegetation
   build-depends:
     Ecosmos,
     QuickCheck,

@@ -13,10 +13,14 @@ data HexCoord a = HexCoord
   }
   deriving (Show, Eq, Generic, NFDataX, BitPack, Waveform)
 
-hexCoord :: (Num a, Eq a) => a -> a -> Maybe (HexCoord a)
-hexCoord x y
-  | x + y == 0 = Just (HexCoord x y)
-  | otherwise = Nothing
+-- TODO Think about how implementing z-coordinate will work as it must be allowed to be negative
+-- z :: forall a b .(Num a, Num b) => HexCoord a -> b
+-- z coord = -fromIntegral (x coord) :: b - fromIntegral (y coord) :: b
 
 instance (Num a) => Semigroup (HexCoord a) where
   (HexCoord x0 y0) <> (HexCoord x1 y1) = HexCoord (x0 + x1) (y0 + y1)
+
+increment :: (Num a, Eq a, Bounded a) => HexCoord a -> HexCoord a
+increment (HexCoord x0 y0)
+  | x0 == maxBound = HexCoord minBound (y0 + 1)
+  | otherwise = HexCoord (x0 + 1) y0 -- y0 will wrap when max is reached as intended

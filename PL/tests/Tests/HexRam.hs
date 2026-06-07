@@ -20,17 +20,16 @@ C.createDomain C.vSystem {C.vName = "TestDom", C.vPeriod = 1000}
 
 type AddrWidth = 8
 
-type DataD = 8
+type DataWidth = 8
 
 hexRamLatency :: Int
 hexRamLatency = 2
 
--- TODO Fix why the highest index element is not allowed in the bram
 vInAddrRange :: H.Gen (C.Unsigned AddrWidth)
 vInAddrRange = genUnsigned (Range.linear 0 ((maxBound :: C.Unsigned AddrWidth) - 1))
 
-vInDataRange :: H.Gen (C.Unsigned DataD)
-vInDataRange = genUnsigned (Range.linear 0 ((maxBound :: C.Unsigned DataD) - 1))
+vInDataRange :: H.Gen (C.Unsigned DataWidth)
+vInDataRange = genUnsigned (Range.linear 0 ((maxBound :: C.Unsigned DataWidth) - 1))
 
 genHexCoord :: H.Gen (Hex.HexCoord (C.Unsigned AddrWidth))
 genHexCoord =
@@ -48,7 +47,7 @@ prop_read_init_ram = H.property $ do
 
   let inputAddr = C.fromList inp
       -- Domain, clk, rst and ena must be defined due to VCD dump requiring it
-      simOutSignal = C.withClockResetEnable @TestDom C.clockGen C.resetGen C.enableGen $ hexRam @TestDom @AddrWidth @DataD inputAddr (pure Nothing)
+      simOutSignal = C.withClockResetEnable @TestDom C.clockGen C.resetGen C.enableGen $ hexRam @TestDom @AddrWidth @DataWidth inputAddr (pure Nothing)
       -- The output register of the BRAM is undefined on startup, therefore drop it
       simOut = drop 1 $ fromIntegral <$> C.sampleN (simDuration + 1) simOutSignal :: [Int]
       expected = replicate simDuration 3
@@ -66,7 +65,7 @@ prop_read_init_ram = H.property $ do
   H.annotate $ "received: " <> show simOut
   H.diff expected (==) simOut
 
-genHexData :: Hex.HexCoord (C.Unsigned AddrWidth) -> H.Gen (Maybe (Hex.HexCoord (C.Unsigned AddrWidth), C.Unsigned DataD))
+genHexData :: Hex.HexCoord (C.Unsigned AddrWidth) -> H.Gen (Maybe (Hex.HexCoord (C.Unsigned AddrWidth), C.Unsigned DataWidth))
 genHexData addr = do
   dataD <- vInDataRange
   pure (Just (addr, dataD))
@@ -74,8 +73,8 @@ genHexData addr = do
 addrDelayedHexRam ::
   (C.HiddenClockResetEnable TestDom) =>
   [Hex.HexCoord (C.Unsigned AddrWidth)] ->
-  [Maybe (Hex.HexCoord (C.Unsigned AddrWidth), C.Unsigned DataD)] ->
-  C.Signal TestDom (C.Unsigned DataD)
+  [Maybe (Hex.HexCoord (C.Unsigned AddrWidth), C.Unsigned DataWidth)] ->
+  C.Signal TestDom (C.Unsigned DataWidth)
 addrDelayedHexRam inAddr inData = SW.traceSignal "outData" outData
   where
     addrSig = case inAddr of
@@ -83,7 +82,7 @@ addrDelayedHexRam inAddr inData = SW.traceSignal "outData" outData
       -- the first
       firstAddr : _ -> C.register @TestDom firstAddr (SW.traceSignal "reAddr" $ C.fromList inAddr)
       [] -> error "inAddr must be non-empty"
-    outData = hexRam @TestDom @AddrWidth @DataD (SW.traceSignal "addrDel" addrSig) (SW.traceSignal "wrData" $ C.fromList inData)
+    outData = hexRam @TestDom @AddrWidth @DataWidth (SW.traceSignal "addrDel" addrSig) (SW.traceSignal "wrData" $ C.fromList inData)
 
 prop_write_read_ram :: H.Property
 prop_write_read_ram = H.property $ do

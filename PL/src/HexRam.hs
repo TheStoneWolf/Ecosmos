@@ -4,16 +4,16 @@ import Clash.Prelude
 import qualified Example.Hex as Hex
 
 hexRam ::
-  forall dom addrWidth dataD.
-  (HiddenClockResetEnable dom, KnownNat dataD, KnownNat (2 * addrWidth), 1 <= 2 * addrWidth, 1 <= 2 ^ 2 * addrWidth - 1) =>
-  Signal dom (Hex.HexCoord (Unsigned addrWidth)) -> Signal dom (Maybe (Hex.HexCoord (Unsigned addrWidth), Unsigned dataD)) -> Signal dom (Unsigned dataD)
+  forall dom addrWidth dataWidth.
+  (HiddenClockResetEnable dom, Hex.AddrConstraints addrWidth, KnownNat dataWidth) =>
+  Signal dom (Hex.HexCoord (Unsigned addrWidth)) -> Signal dom (Maybe (Hex.HexCoord (Unsigned addrWidth), Unsigned dataWidth)) -> Signal dom (Unsigned dataWidth)
 hexRam reCoordS wrCoordS = plantMass
   where
     plantMass = bRAM (linAddr <$> reCoordS) (wrAddr <$> wrCoordS)
 
-wrAddr :: (Hex.AddrConstraints addrWidth, KnownNat dataD) => Maybe (Hex.HexCoord (Unsigned addrWidth), Unsigned dataD) -> Maybe (Unsigned (2 * addrWidth), Unsigned dataD)
+wrAddr :: (Hex.AddrConstraints addrWidth, KnownNat dataWidth) => Maybe (Hex.HexCoord (Unsigned addrWidth), Unsigned dataWidth) -> Maybe (Unsigned (2 * addrWidth), Unsigned dataWidth)
 wrAddr Nothing = Nothing
-wrAddr (Just (hexAddr, dataD)) = Just (linAddr hexAddr, dataD)
+wrAddr (Just (hexAddr, dataWidth)) = Just (linAddr hexAddr, dataWidth)
 
 linAddr :: forall addrWidth. (Hex.AddrConstraints addrWidth) => Hex.HexCoord (Unsigned addrWidth) -> Unsigned (2 * addrWidth)
 linAddr hexCoord = addr
@@ -31,4 +31,4 @@ bRAM ::
   Signal dom (Unsigned addrWidth) -> Signal dom (Maybe (Unsigned addrWidth, Unsigned wrData)) -> Signal dom (Unsigned wrData)
 bRAM reAddr wrPacket = memOut
   where
-    memOut = blockRam1 NoClearOnReset (SNat :: SNat (2 ^ addrWidth - 1)) (3 :: Unsigned wrData) reAddr wrPacket
+    memOut = blockRam1 NoClearOnReset (SNat :: SNat (2 ^ addrWidth)) (3 :: Unsigned wrData) reAddr wrPacket
