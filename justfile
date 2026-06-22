@@ -11,5 +11,12 @@ pl-surfer TARGET:
   kitten @ launch --type=tab --cwd="$PWD" bash -lc "surfer 'PL/waveforms/{{TARGET}}.vcd' --command-file 'surfer.sucl'"
 
 build: pl-build
-  echo "Building all..."
+  @echo "Building all..."
+
+[working-directory: 'Analysis']
+py-throughput *PARAMETERS:
+  . .venv/bin/activate
+  pip install -r requirements.txt
+  python memoryThroughput.py {{PARAMETERS}}
+
 
