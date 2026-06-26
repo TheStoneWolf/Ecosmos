@@ -20,8 +20,7 @@ build: pl-build
 # Run bottleneck analysis script
 [working-directory: 'Analysis']
 py-throughput *PARAMETERS:
-  . .venv/bin/activate
-  pip install -r requirements.txt
-  python memoryThroughput.py {{PARAMETERS}}
+  .venv/bin/python -m pip install -r requirements.txt
+  .venv/bin/python memoryThroughput.py {{PARAMETERS}}
 
 
