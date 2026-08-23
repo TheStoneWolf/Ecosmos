@@ -9,10 +9,11 @@ vegetationGain = 4
 -- | Calculate vegetation for next tick
 --
 -- >>> import Clash.Prelude
--- >>> vegetationTick @4 12
--- 0
+-- >>> vegetationTick @4 (Just 12)
+-- Just 0
 -- >>> import Clash.Prelude
--- >>> (vegetationTick @4 5) - vegetationGain
--- 5
-vegetationTick :: (KnownNat dataWidth) => Unsigned dataWidth -> Unsigned dataWidth
-vegetationTick inData = satAdd SatWrap inData vegetationGain
+-- >>> fmap (\value -> value - vegetationGain) (vegetationTick @4 (Just 5))
+-- Just 5
+vegetationTick :: (KnownNat dataWidth) => Maybe (Unsigned dataWidth) -> Maybe (Unsigned dataWidth)
+vegetationTick (Just inData) = Just $ satAdd SatWrap inData vegetationGain
+vegetationTick Nothing = Nothing

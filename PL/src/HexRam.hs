@@ -21,7 +21,7 @@ linAddr hexCoord = addr
     x = Hex.x hexCoord
     y = Hex.y hexCoord
 
-    -- TODO Think about if mapping the 3d-hexgrid coordinates to a 2d linear address space
+    -- TODO: Think about if mapping the 3d-hexgrid coordinates to a 2d linear address space
     -- can be made more efficient somehow
     addr = shiftL (resize y) (natToNum @addrWidth) + resize x
 

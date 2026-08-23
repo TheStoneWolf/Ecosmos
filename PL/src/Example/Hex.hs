@@ -13,6 +13,16 @@ data HexCoord a = HexCoord
   }
   deriving (Show, Eq, Generic, NFDataX, BitPack, Waveform)
 
+instance (Bounded a) => Bounded (HexCoord a) where
+  minBound = HexCoord minBound minBound
+  maxBound = HexCoord maxBound maxBound
+
+maxHex :: (Bounded a) => HexCoord a
+maxHex = maxBound
+
+minHex :: (Bounded a) => HexCoord a
+minHex = minBound
+
 -- TODO Think about how implementing z-coordinate will work as it must be allowed to be negative
 -- z :: forall a b .(Num a, Num b) => HexCoord a -> b
 -- z coord = -fromIntegral (x coord) :: b - fromIntegral (y coord) :: b
