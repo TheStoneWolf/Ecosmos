@@ -11,7 +11,7 @@
 
 ## PL Workflow
 
-- Run all PL tests with `just pl-test`.
+- Run all PL tests with `just pl-test`. Try not to unless asked to.
 - The shared Cabal options enable `NoImplicitPrelude` and Clash-specific GHC settings.
 - Hardware modules should use `Clash.Prelude`, as the regular Haskell Prelude is only for SW
 - Only code that is to be synthesized should be synthesizable. That is code in `PL/src`, while the testbenches in `PL/tests` do not have that restriction
