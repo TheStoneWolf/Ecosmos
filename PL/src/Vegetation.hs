@@ -12,7 +12,7 @@ import VegetationCalc
 data State (n :: Nat)
   = Idle
   | Update (Hex.HexCoord (Unsigned n))
-  | UpdateFinish (Index 2)
+  | UpdateFinish (Index 3)
   | Reading (Hex.HexCoord (Unsigned n))
   deriving (Generic, NFDataX)
 

@@ -50,20 +50,8 @@ tickRamData tick = map (pure . fromIntegral . calc) [0 .. nrAddresses - 1]
   where
     calc x = (3 + vegetationGainN * (tick + x `G.div` nrAddresses)) `G.mod` dataWidthN
 
---
--- expData :: [Maybe (C.Unsigned DataWidth)]
--- expData = map (pure . fromIntegral . calc) [0 .. nrAddresses - 1]
---   where
---     calc x = (3 + vegetationGainN * (1 + x `G.div` nrAddresses)) `G.mod` dataWidthN
---
--- expected :: [Maybe (C.Unsigned DataWidth)]
--- expected = G.replicate (C.natToNum @Latency + nrAddresses) Nothing ++ expData
-
 inp :: [Hex.HexCoord (C.Unsigned AddrWidth)]
 inp = [Hex.HexCoord x y | x <- [0 .. 2 ^ nrAxisBits - 1], y <- [0 .. 2 ^ nrAxisBits - 1]]
-
-expected :: [Int]
-expected = fromIntegral <$> catMaybes (tickRamData 0)
 
 genAddresses :: H.Gen (Hex.HexCoord (C.Unsigned AddrWidth))
 genAddresses = Hex.HexCoord <$> x <*> y
@@ -72,36 +60,43 @@ genAddresses = Hex.HexCoord <$> x <*> y
     y = genUnsigned $ Range.linear 0 axisMax
     axisMax = 2 ^ nrAxisBits - 1
 
-prop_read_all_ram :: H.Property
-prop_read_all_ram = H.property $ do
+-- ONLY READ
+prop_only_read_ram :: H.Property
+prop_only_read_ram = H.property $ do
   let inAddr = C.fromList $ C.cycle inp
       simOutSignal = C.withClockResetEnable @TestDom C.clockGen C.resetGen C.enableGen $ vegetation @TestDom @AddrWidth @DataWidth (Just <$> inAddr) (pure False)
       simOut = take nrAddresses . fmap fromIntegral . catMaybes $ C.sampleN simDuration (snd <$> simOutSignal) :: [Int]
+
+      expected = fromIntegral <$> catMaybes (tickRamData 0)
 
   H.annotate $ "expected: " <> show expected
   H.annotate $ "received: " <> show simOut
   H.diff expected (==) simOut
 
-simDuration2 :: Int
-simDuration2 = length expected
+-- UPDATE THEN READ
+testCircuit :: forall dom. (C.HiddenClockResetEnable dom) => C.Signal dom (Maybe (C.Unsigned DataWidth))
+testCircuit =
+  let updateStrobe = C.fromList $ True : True : repeat False
+      startupCount = C.register 0 (startupCount + 1) :: C.Signal dom Integer
+      startupDone = startupCount C..>=. 10
+      isReading = C.register False (isReading C..||. (startupDone C..&&. isReady))
 
--- prop_vegetation :: Property
--- prop_vegetation =
---   -- Run once, since hedgehog and possible other testing libraries seems to not like the first inputs being Nothing inside of Signal
---   -- By running deterministically with one test vector, the test can be performed
---   once $
---     property $
---       let delayCalcStart = C.fromList $ G.replicate nrAddresses True ++ G.repeat False
---           reAddr = C.fromList $ G.replicate (C.natToNum @Latency + nrAddresses) Nothing ++ (Just <$> inp) ++ G.repeat Nothing
---
---           clk = C.clockGen
---           rst = C.resetGen
---
---           simOutSignal = C.exposeClockResetEnable (vegetation @TestDom @AddrWidth @DataWidth reAddr delayCalcStart) clk rst C.enableGen
---           output = C.sampleN @TestDom simDuration2 simOutSignal
---           comparisonList = zip3 [0 :: Int ..] expected output
---           result = expected == output
---        in traceShow comparisonList result
+      input = C.mux isReading (C.fromList $ Just <$> C.cycle inp) (pure Nothing)
+
+      (isReady, resultData) = C.unbundle $ vegetation @dom @AddrWidth @DataWidth input updateStrobe
+   in resultData
+
+prop_update_then_read :: H.Property
+prop_update_then_read = H.property $ do
+  let simOutSignal = C.unbundle $ C.withClockResetEnable @TestDom C.clockGen C.resetGen C.enableGen testCircuit
+      simOutInt = C.sampleN simDuration simOutSignal
+      simOut = take nrAddresses . fmap fromIntegral . catMaybes $ simOutInt :: [Int]
+
+      expected = fromIntegral <$> catMaybes (tickRamData 1)
+
+  H.annotate $ "expected: " <> show expected
+  H.annotate $ "received: " <> show simOut
+  H.diff expected (==) simOut
 
 vegetationTests :: TestTree
 vegetationTests = $(testGroupGenerator)
